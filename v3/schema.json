@@ -800,21 +800,6 @@
                 }
               },
               "strictProperties": true
-            },
-            "plan": {
-              "description": "identity of add-on plan",
-              "properties": {
-                "id": {
-                  "$ref": "#/definitions/plan/definitions/id"
-                },
-                "name": {
-                  "$ref": "#/definitions/plan/definitions/name"
-                }
-              },
-              "strictProperties": true,
-              "type": [
-                "object"
-              ]
             }
           },
           "additionalProperties": false,
@@ -1904,6 +1889,9 @@
           "properties": {
             "cents": {
               "$ref": "#/definitions/plan/definitions/cents"
+            },
+            "contract": {
+              "$ref": "#/definitions/plan/definitions/contract"
             },
             "unit": {
               "$ref": "#/definitions/plan/definitions/unit"
@@ -5563,6 +5551,19 @@
             "string"
           ]
         },
+        "docker_image": {
+          "description": "the Docker image used by this process type",
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/docker-image/definitions/id"
+            }
+          },
+          "strictProperties": true,
+          "type": [
+            "object",
+            "null"
+          ]
+        },
         "id": {
           "description": "unique identifier of this process type",
           "example": "01234567-89ab-cdef-0123-456789abcdef",
@@ -5602,7 +5603,6 @@
           "description": "type of process to maintain",
           "example": "web",
           "readOnly": true,
-          "pattern": "^[-\\w]{1,128}$",
           "type": [
             "string"
           ]
@@ -5620,19 +5620,25 @@
           "additionalProperties": false,
           "description": "Properties to update a process type",
           "properties": {
+            "docker_image": {
+              "$ref": "#/definitions/docker-image/definitions/identity"
+            },
+            "command": {
+              "$ref": "#/definitions/docker-image/definitions/command"
+            },
+            "process": {
+              "$ref": "#/definitions/formation/definitions/identity"
+            },
             "quantity": {
               "$ref": "#/definitions/formation/definitions/quantity"
             },
             "size": {
               "$ref": "#/definitions/formation/definitions/size"
-            },
-            "type": {
-              "$ref": "#/definitions/formation/definitions/type"
             }
           },
           "readOnly": false,
           "required": [
-            "type"
+            "process"
           ],
           "type": [
             "object"
@@ -5679,7 +5685,16 @@
                 "items": {
                   "$ref": "#/definitions/formation/definitions/update"
                 },
-                "description": "Array with formation updates. Each element must have \"type\", the id or name of the process type to be updated, and can optionally update its \"quantity\" or \"size\"."
+                "description": "Array with formation updates. Each element must have \"type\", the id or name of the process type to be updated, and can optionally update its \"quantity\" or \"size\".",
+                "example": [
+                  {
+                    "quantity": 1,
+                    "size": "standard-2X",
+                    "type": [
+                      "web"
+                    ]
+                  }
+                ]
               }
             },
             "required": [
@@ -5697,7 +5712,7 @@
               "array"
             ]
           },
-          "title": "Batch Update"
+          "title": "Batch update"
         },
         {
           "description": "Update process type",
@@ -5706,6 +5721,12 @@
           "rel": "update",
           "schema": {
             "properties": {
+              "command": {
+                "$ref": "#/definitions/docker-image/definitions/command"
+              },
+              "docker_image": {
+                "$ref": "#/definitions/docker-image/definitions/identity"
+              },
               "quantity": {
                 "$ref": "#/definitions/formation/definitions/quantity"
               },
@@ -5746,6 +5767,9 @@
         },
         "created_at": {
           "$ref": "#/definitions/formation/definitions/created_at"
+        },
+        "docker_image": {
+          "$ref": "#/definitions/formation/definitions/docker_image"
         },
         "id": {
           "$ref": "#/definitions/formation/definitions/id"
@@ -9839,6 +9863,213 @@
         }
       }
     },
+    "peering-info": {
+      "description": "[Peering Info](https://devcenter.heroku.com/articles/private-space-vpc-peering) gives you the information necessary to peer an AWS VPC to a Private Space.",
+      "$schema": "http://json-schema.org/draft-04/hyper-schema",
+      "stability": "prototype",
+      "strictProperties": true,
+      "title": "Heroku Platform API - Peering Info",
+      "type": [
+        "object"
+      ],
+      "properties": {
+        "aws_account_id": {
+          "$ref": "#/definitions/peering/definitions/aws_account_id"
+        },
+        "aws_region": {
+          "$ref": "#/definitions/region/definitions/provider/properties/region"
+        },
+        "vpc_id": {
+          "$ref": "#/definitions/peering/definitions/vpc_id"
+        },
+        "vpc_cidr": {
+          "description": "The CIDR range of the Private Space VPC",
+          "$ref": "#/definitions/peering/definitions/cidr"
+        },
+        "dyno_cidr_blocks": {
+          "description": "The CIDR ranges that should be routed to the Private Space VPC.",
+          "type": [
+            "array"
+          ],
+          "items": {
+            "$ref": "#/definitions/peering/definitions/cidr"
+          }
+        },
+        "unavailable_cidr_blocks": {
+          "description": "The CIDR ranges that you must not conflict with.",
+          "type": [
+            "array"
+          ],
+          "items": {
+            "$ref": "#/definitions/peering/definitions/cidr"
+          }
+        }
+      },
+      "links": [
+        {
+          "description": "Provides the necessary information to establish an AWS VPC Peering with your private space.",
+          "href": "/spaces/{(%23%2Fdefinitions%2Fspace%2Fdefinitions%2Fidentity)}/peering-info",
+          "method": "GET",
+          "rel": "self",
+          "targetSchema": {
+            "$ref": "#/definitions/peering-info"
+          },
+          "title": "Info"
+        }
+      ]
+    },
+    "peering": {
+      "description": "[Peering](https://devcenter.heroku.com/articles/private-space-vpc-peering) provides a way to peer your Private Space VPC to another AWS VPC.",
+      "$schema": "http://json-schema.org/draft-04/hyper-schema",
+      "stability": "prototype",
+      "strictProperties": true,
+      "title": "Heroku Platform API - Peering",
+      "type": [
+        "object"
+      ],
+      "definitions": {
+        "aws_account_id": {
+          "description": "The AWS account ID of your Private Space.",
+          "example": "123456789012",
+          "readOnly": true,
+          "type": [
+            "string"
+          ]
+        },
+        "vpc_id": {
+          "description": "The AWS VPC ID of the peer.",
+          "example": "vpc-1234567890",
+          "readOnly": true,
+          "type": [
+            "string"
+          ]
+        },
+        "type": {
+          "description": "The type of peering connection.",
+          "example": "heroku-managed",
+          "type": [
+            "string"
+          ],
+          "enum": [
+            "heroku-managed",
+            "customer-managed",
+            "unknown"
+          ]
+        },
+        "status": {
+          "description": "The status of the peering connection.",
+          "example": "pending-acceptance",
+          "enum": [
+            "initiating-request",
+            "pending-acceptance",
+            "provisioning",
+            "active",
+            "failed",
+            "expired",
+            "rejected",
+            "deleted"
+          ],
+          "type": [
+            "string"
+          ],
+          "readOnly": true
+        },
+        "pcx_id": {
+          "description": "The AWS VPC Peering Connection ID of the peering.",
+          "example": "pcx-123456789012",
+          "readOnly": true,
+          "type": [
+            "string"
+          ]
+        },
+        "cidr": {
+          "description": "An IP address and the number of significant bits that make up the routing or networking portion.",
+          "example": "10.0.0.0/16",
+          "type": [
+            "string"
+          ]
+        },
+        "expires": {
+          "description": "When a peering connection will expire.",
+          "example": "2020-01-01T12:00:00Z",
+          "format": "date-time",
+          "readOnly": true,
+          "type": [
+            "string"
+          ]
+        }
+      },
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/peering/definitions/type"
+        },
+        "pcx_id": {
+          "$ref": "#/definitions/peering/definitions/pcx_id"
+        },
+        "cidr_blocks": {
+          "description": "The CIDR blocks of the peer.",
+          "type": [
+            "array"
+          ],
+          "items": {
+            "$ref": "#/definitions/peering/definitions/cidr"
+          }
+        },
+        "status": {
+          "$ref": "#/definitions/peering/definitions/status"
+        },
+        "aws_vpc_id": {
+          "$ref": "#/definitions/peering/definitions/vpc_id"
+        },
+        "aws_account_id": {
+          "$ref": "#/definitions/peering/definitions/aws_account_id"
+        },
+        "expires": {
+          "$ref": "#/definitions/peering/definitions/expires"
+        }
+      },
+      "links": [
+        {
+          "description": "List peering connections of a private space.",
+          "href": "/spaces/{(%23%2Fdefinitions%2Fspace%2Fdefinitions%2Fidentity)}/peerings",
+          "method": "GET",
+          "rel": "instances",
+          "targetSchema": {
+            "items": {
+              "$ref": "#/definitions/peering"
+            },
+            "type": [
+              "array"
+            ]
+          },
+          "title": "List"
+        },
+        {
+          "description": "Accept a pending peering connection with a private space.",
+          "href": "/spaces/{(%23%2Fdefinitions%2Fspace%2Fdefinitions%2Fidentity)}/peerings/{(%23%2Fdefinitions%2Fpeering%2Fdefinitions%2Fpcx_id)}/actions/accept",
+          "method": "POST",
+          "rel": "empty",
+          "title": "Accept"
+        },
+        {
+          "description": "Destroy an active peering connection with a private space.",
+          "href": "/spaces/{(%23%2Fdefinitions%2Fspace%2Fdefinitions%2Fidentity)}/peerings/{(%23%2Fdefinitions%2Fpeering%2Fdefinitions%2Fpcx_id)}",
+          "rel": "empty",
+          "method": "DELETE",
+          "title": "Destroy"
+        },
+        {
+          "description": "Fetch information for existing peering connection",
+          "href": "/spaces/{(%23%2Fdefinitions%2Fspace%2Fdefinitions%2Fidentity)}/peerings/{(%23%2Fdefinitions%2Fpeering%2Fdefinitions%2Fpcx_id)}",
+          "method": "GET",
+          "rel": "self",
+          "targetSchema": {
+            "$ref": "#/definitions/peering"
+          },
+          "title": "Info"
+        }
+      ]
+    },
     "organization-app-permission": {
       "$schema": "http://json-schema.org/draft-04/hyper-schema",
       "description": "Deprecated: An organization app permission is a behavior that is assigned to a user in an organization app.",
@@ -10696,6 +10927,14 @@
             "integer"
           ]
         },
+        "contract": {
+          "description": "price is negotiated in a contract outside of monthly add-on billing",
+          "example": false,
+          "readOnly": true,
+          "type": [
+            "boolean"
+          ]
+        },
         "unit": {
           "description": "unit of price for plan",
           "example": "month",
@@ -10823,6 +11062,9 @@
           "properties": {
             "cents": {
               "$ref": "#/definitions/plan/definitions/cents"
+            },
+            "contract": {
+              "$ref": "#/definitions/plan/definitions/contract"
             },
             "unit": {
               "$ref": "#/definitions/plan/definitions/unit"
@@ -10984,6 +11226,19 @@
               "readOnly": true,
               "type": [
                 "string"
+              ],
+              "enum": [
+                "ap-south-1",
+                "eu-west-1",
+                "ap-southeast-1",
+                "ap-southeast-2",
+                "eu-central-1",
+                "ap-northeast-2",
+                "ap-northeast-1",
+                "us-east-1",
+                "sa-east-1",
+                "us-west-1",
+                "us-west-2"
               ]
             }
           },
@@ -14899,6 +15154,279 @@
           "$ref": "#/definitions/whitelisted-add-on-service/definitions/id"
         }
       }
+    },
+    "docker-image": {
+      "description": "A Docker image is a snapshot of your application code that is ready to run on the platform.",
+      "$schema": "http://json-schema.org/draft-04/hyper-schema",
+      "stability": "prototype",
+      "strictProperties": true,
+      "title": "Heroku Platform API - Docker Image",
+      "type": [
+        "object"
+      ],
+      "definitions": {
+        "command": {
+          "description": "the command to run",
+          "example": [
+            "echo",
+            "Hello, World"
+          ],
+          "readOnly": false,
+          "type": [
+            "array"
+          ],
+          "minItems": 1
+        },
+        "created_at": {
+          "description": "when the image was created",
+          "example": "2012-01-01T12:00:00Z",
+          "format": "date-time",
+          "readOnly": true,
+          "type": [
+            "string"
+          ]
+        },
+        "entrypoint": {
+          "description": "the entrypoint to the command",
+          "example": [
+            "/bin/sh",
+            "-c"
+          ],
+          "readOnly": false,
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "env": {
+          "description": "the runtime environment required for the command",
+          "example": {
+            "PATH": "/bin"
+          },
+          "readOnly": false,
+          "additionalProperties": false,
+          "patternProperties": {
+            "^\\w+$": {
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "type": [
+            "object"
+          ]
+        },
+        "id": {
+          "description": "unique identifier of the image",
+          "example": "01234567-89ab-cdef-0123-456789abcdef",
+          "format": "uuid",
+          "readOnly": true,
+          "type": [
+            "string"
+          ]
+        },
+        "identity": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/docker-image/definitions/id"
+            }
+          ]
+        },
+        "image_id": {
+          "description": "the Docker image ID",
+          "example": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+          "readOnly": true,
+          "type": [
+            "string"
+          ]
+        },
+        "layers": {
+          "description": "the layers of the image",
+          "properties": {
+            "system": {
+              "description": "the system layers of the image",
+              "example": [
+                {
+                  "url": "https://example.cloudfront.com/..."
+                }
+              ],
+              "readOnly": false,
+              "items": {
+                "$ref": "#/definitions/docker-image/definitions/system_layer"
+              },
+              "type": [
+                "array"
+              ]
+            },
+            "user": {
+              "description": "the user layers of the image",
+              "example": [
+                {
+                  "bucket": "example",
+                  "object": "/..."
+                }
+              ],
+              "readOnly": false,
+              "items": {
+                "$ref": "#/definitions/docker-image/definitions/user_layer"
+              },
+              "type": [
+                "array"
+              ]
+            }
+          },
+          "readOnly": false,
+          "type": [
+            "object"
+          ]
+        },
+        "shell": {
+          "description": "the default shell",
+          "example": [
+            "/bin/sh",
+            "-c"
+          ],
+          "readOnly": false,
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "system_layer": {
+          "description": "a system layer",
+          "properties": {
+            "url": {
+              "description": "the location of the system layer",
+              "example": "https://example.cloudfront.com/...",
+              "readOnly": false,
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "readOnly": false,
+          "type": [
+            "object"
+          ]
+        },
+        "updated_at": {
+          "description": "when the image was updated",
+          "example": "2012-01-01T12:00:00Z",
+          "format": "date-time",
+          "readOnly": true,
+          "type": [
+            "string"
+          ]
+        },
+        "user_layer": {
+          "description": "a user layer",
+          "properties": {
+            "bucket": {
+              "description": "the S3 bucket name where the user layer is stored",
+              "example": "example",
+              "readOnly": false,
+              "type": [
+                "string"
+              ]
+            },
+            "object": {
+              "description": "the S3 object name where the user layer is stored",
+              "example": "/...",
+              "readOnly": false,
+              "type": [
+                "string"
+              ]
+            }
+          },
+          "readOnly": false,
+          "type": [
+            "object"
+          ]
+        },
+        "working_directory": {
+          "description": "the working directory for the command",
+          "example": "/home/user",
+          "readOnly": true,
+          "type": [
+            "string"
+          ]
+        }
+      },
+      "links": [
+        {
+          "description": "Create a new Docker image.",
+          "href": "/apps/{(%23%2Fdefinitions%2Fapp%2Fdefinitions%2Fidentity)}/docker-images",
+          "method": "POST",
+          "rel": "create",
+          "schema": {
+            "properties": {
+              "command": {
+                "$ref": "#/definitions/docker-image/definitions/command"
+              },
+              "entrypoint": {
+                "$ref": "#/definitions/docker-image/definitions/entrypoint"
+              },
+              "env": {
+                "$ref": "#/definitions/docker-image/definitions/env"
+              },
+              "image_id": {
+                "$ref": "#/definitions/docker-image/definitions/image_id"
+              },
+              "layers": {
+                "$ref": "#/definitions/docker-image/definitions/layers"
+              },
+              "shell": {
+                "$ref": "#/definitions/docker-image/definitions/shell"
+              },
+              "working_directory": {
+                "$ref": "#/definitions/docker-image/definitions/working_directory"
+              }
+            },
+            "required": [
+              "layers"
+            ],
+            "type": [
+              "object"
+            ]
+          },
+          "targetSchema": {
+            "$ref": "#/definitions/docker-image"
+          },
+          "title": "Create"
+        }
+      ],
+      "properties": {
+        "command": {
+          "$ref": "#/definitions/docker-image/definitions/command"
+        },
+        "created_at": {
+          "$ref": "#/definitions/docker-image/definitions/created_at"
+        },
+        "entrypoint": {
+          "$ref": "#/definitions/docker-image/definitions/entrypoint"
+        },
+        "env": {
+          "$ref": "#/definitions/docker-image/definitions/env"
+        },
+        "id": {
+          "$ref": "#/definitions/docker-image/definitions/id"
+        },
+        "image_id": {
+          "$ref": "#/definitions/docker-image/definitions/image_id"
+        },
+        "layers": {
+          "$ref": "#/definitions/docker-image/definitions/layers"
+        },
+        "shell": {
+          "$ref": "#/definitions/docker-image/definitions/shell"
+        },
+        "updated_at": {
+          "$ref": "#/definitions/docker-image/definitions/updated_at"
+        },
+        "working_directory": {
+          "$ref": "#/definitions/docker-image/definitions/working_directory"
+        }
+      }
     }
   },
   "properties": {
@@ -15061,6 +15589,12 @@
     "password-reset": {
       "$ref": "#/definitions/password-reset"
     },
+    "peering-info": {
+      "$ref": "#/definitions/peering-info"
+    },
+    "peering": {
+      "$ref": "#/definitions/peering"
+    },
     "organization-app-permission": {
       "$ref": "#/definitions/organization-app-permission"
     },
@@ -15147,6 +15681,9 @@
     },
     "whitelisted-add-on-service": {
       "$ref": "#/definitions/whitelisted-add-on-service"
+    },
+    "docker-image": {
+      "$ref": "#/definitions/docker-image"
     }
   },
   "description": "The platform API empowers developers to automate, extend and combine Heroku with other services.",

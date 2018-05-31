@@ -336,8 +336,9 @@ type AddOn struct {
 		Name string `json:"name" url:"name,key"` // unique name of app
 	} `json:"app" url:"app,key"` // billing application associated with this add-on
 	BilledPrice *struct {
-		Cents int    `json:"cents" url:"cents,key"` // price in cents per unit of plan
-		Unit  string `json:"unit" url:"unit,key"`   // unit of price for plan
+		Cents    int    `json:"cents" url:"cents,key"`       // price in cents per unit of plan
+		Contract bool   `json:"contract" url:"contract,key"` // price is negotiated in a contract outside of monthly add-on billing
+		Unit     string `json:"unit" url:"unit,key"`         // unit of price for plan
 	} `json:"billed_price" url:"billed_price,key"` // billed price
 	ConfigVars []string  `json:"config_vars" url:"config_vars,key"` // config vars exposed to the owning app by this add-on
 	CreatedAt  time.Time `json:"created_at" url:"created_at,key"`   // when add-on was created
@@ -367,10 +368,10 @@ func (s *Service) AddOnInfo(ctx context.Context, addOnIdentity string) (*AddOn, 
 }
 
 type AddOnCreateOpts struct {
-	Attachment *struct{}         `json:"attachment,omitempty" url:"attachment,omitempty,key"` // name for add-on's initial attachment
-	Config     map[string]string `json:"config,omitempty" url:"config,omitempty,key"`         // custom add-on provisioning options
-	Confirm    *string           `json:"confirm,omitempty" url:"confirm,omitempty,key"`       // name of owning app for confirmation
-	Plan       string            `json:"plan" url:"plan,key"`                                 // unique identifier of this plan
+	Attachment *struct{}          `json:"attachment,omitempty" url:"attachment,omitempty,key"` // name for add-on's initial attachment
+	Config     *map[string]string `json:"config,omitempty" url:"config,omitempty,key"`         // custom add-on provisioning options
+	Confirm    *string            `json:"confirm,omitempty" url:"confirm,omitempty,key"`       // name of owning app for confirmation
+	Plan       string             `json:"plan" url:"plan,key"`                                 // unique identifier of this plan
 }
 
 // Create a new add-on.
@@ -442,8 +443,9 @@ type AddOnActionProvisionResult struct {
 		Name string `json:"name" url:"name,key"` // unique name of app
 	} `json:"app" url:"app,key"` // billing application associated with this add-on
 	BilledPrice *struct {
-		Cents int    `json:"cents" url:"cents,key"` // price in cents per unit of plan
-		Unit  string `json:"unit" url:"unit,key"`   // unit of price for plan
+		Cents    int    `json:"cents" url:"cents,key"`       // price in cents per unit of plan
+		Contract bool   `json:"contract" url:"contract,key"` // price is negotiated in a contract outside of monthly add-on billing
+		Unit     string `json:"unit" url:"unit,key"`         // unit of price for plan
 	} `json:"billed_price" url:"billed_price,key"` // billed price
 	ConfigVars []string  `json:"config_vars" url:"config_vars,key"` // config vars exposed to the owning app by this add-on
 	CreatedAt  time.Time `json:"created_at" url:"created_at,key"`   // when add-on was created
@@ -476,8 +478,9 @@ type AddOnActionDeprovisionResult struct {
 		Name string `json:"name" url:"name,key"` // unique name of app
 	} `json:"app" url:"app,key"` // billing application associated with this add-on
 	BilledPrice *struct {
-		Cents int    `json:"cents" url:"cents,key"` // price in cents per unit of plan
-		Unit  string `json:"unit" url:"unit,key"`   // unit of price for plan
+		Cents    int    `json:"cents" url:"cents,key"`       // price in cents per unit of plan
+		Contract bool   `json:"contract" url:"contract,key"` // price is negotiated in a contract outside of monthly add-on billing
+		Unit     string `json:"unit" url:"unit,key"`         // unit of price for plan
 	} `json:"billed_price" url:"billed_price,key"` // billed price
 	ConfigVars []string  `json:"config_vars" url:"config_vars,key"` // config vars exposed to the owning app by this add-on
 	CreatedAt  time.Time `json:"created_at" url:"created_at,key"`   // when add-on was created
@@ -509,10 +512,6 @@ type AddOnAttachment struct {
 		} `json:"app" url:"app,key"` // billing application associated with this add-on
 		ID   string `json:"id" url:"id,key"`     // unique identifier of add-on
 		Name string `json:"name" url:"name,key"` // globally unique name of the add-on
-		Plan struct {
-			ID   string `json:"id" url:"id,key"`     // unique identifier of this plan
-			Name string `json:"name" url:"name,key"` // unique name of this plan
-		} `json:"plan" url:"plan,key"` // identity of add-on plan
 	} `json:"addon" url:"addon,key"` // identity of add-on
 	App struct {
 		ID   string `json:"id" url:"id,key"`     // unique identifier of app
@@ -596,7 +595,7 @@ func (s *Service) AddOnConfigList(ctx context.Context, addOnIdentity string, lr 
 }
 
 type AddOnConfigUpdateOpts struct {
-	Config []*struct {
+	Config *[]*struct {
 		Name  *string `json:"name,omitempty" url:"name,omitempty,key"`   // unique name of the config
 		Value *string `json:"value,omitempty" url:"value,omitempty,key"` // value of the config
 	} `json:"config,omitempty" url:"config,omitempty,key"`
@@ -826,8 +825,8 @@ func (s *Service) AddOnWebhookList(ctx context.Context, addOnIdentity string, lr
 type AddOnWebhookUpdateOpts struct {
 	Authorization *string `json:"authorization,omitempty" url:"authorization,omitempty,key"` // a custom `Authorization` header that Heroku will include with all
 	// webhook notifications
-	Include []*string `json:"include,omitempty" url:"include,omitempty,key"` // the entities that the subscription provides notifications for
-	Level   *string   `json:"level,omitempty" url:"level,omitempty,key"`     // if `notify`, Heroku makes a single, fire-and-forget delivery attempt.
+	Include *[]*string `json:"include,omitempty" url:"include,omitempty,key"` // the entities that the subscription provides notifications for
+	Level   *string    `json:"level,omitempty" url:"level,omitempty,key"`     // if `notify`, Heroku makes a single, fire-and-forget delivery attempt.
 	// If `sync`, Heroku attempts multiple deliveries until the request is
 	// successful or a limit is reached
 	Secret *string `json:"secret,omitempty" url:"secret,omitempty,key"` // a value that Heroku will use to sign all webhook notification
@@ -1188,10 +1187,10 @@ type AppSetupCreateOpts struct {
 		Stack  *string `json:"stack,omitempty" url:"stack,omitempty,key"`   // unique name of stack
 	} `json:"app,omitempty" url:"app,omitempty,key"` // optional parameters for created app
 	Overrides *struct {
-		Buildpacks []*struct {
+		Buildpacks *[]*struct {
 			URL *string `json:"url,omitempty" url:"url,omitempty,key"` // location of the buildpack
 		} `json:"buildpacks,omitempty" url:"buildpacks,omitempty,key"` // overrides the buildpacks specified in the app.json manifest file
-		Env map[string]string `json:"env,omitempty" url:"env,omitempty,key"` // overrides of the env specified in the app.json manifest file
+		Env *map[string]string `json:"env,omitempty" url:"env,omitempty,key"` // overrides of the env specified in the app.json manifest file
 	} `json:"overrides,omitempty" url:"overrides,omitempty,key"` // overrides of keys in the app.json manifest file
 	SourceBlob struct {
 		Checksum *string `json:"checksum,omitempty" url:"checksum,omitempty,key"` // an optional checksum of the gzipped tarball for verifying its
@@ -1378,8 +1377,8 @@ func (s *Service) AppWebhookList(ctx context.Context, appIdentity string, lr *Li
 type AppWebhookUpdateOpts struct {
 	Authorization *string `json:"authorization,omitempty" url:"authorization,omitempty,key"` // a custom `Authorization` header that Heroku will include with all
 	// webhook notifications
-	Include []*string `json:"include,omitempty" url:"include,omitempty,key"` // the entities that the subscription provides notifications for
-	Level   *string   `json:"level,omitempty" url:"level,omitempty,key"`     // if `notify`, Heroku makes a single, fire-and-forget delivery attempt.
+	Include *[]*string `json:"include,omitempty" url:"include,omitempty,key"` // the entities that the subscription provides notifications for
+	Level   *string    `json:"level,omitempty" url:"level,omitempty,key"`     // if `notify`, Heroku makes a single, fire-and-forget delivery attempt.
 	// If `sync`, Heroku attempts multiple deliveries until the request is
 	// successful or a limit is reached
 	Secret *string `json:"secret,omitempty" url:"secret,omitempty,key"` // a value that Heroku will use to sign all webhook notification
@@ -1490,7 +1489,7 @@ type Build struct {
 	App struct {
 		ID string `json:"id" url:"id,key"` // unique identifier of app
 	} `json:"app" url:"app,key"` // app that the build belongs to
-	Buildpacks []struct {
+	Buildpacks *[]struct {
 		URL string `json:"url" url:"url,key"` // location of the buildpack for the app. Either a url (unofficial
 		// buildpacks) or an internal urn (heroku official buildpacks).
 	} `json:"buildpacks" url:"buildpacks,key"` // buildpacks executed for this build, in order
@@ -1523,7 +1522,7 @@ type Build struct {
 	} `json:"user" url:"user,key"` // user that started the build
 }
 type BuildCreateOpts struct {
-	Buildpacks []*struct {
+	Buildpacks *[]*struct {
 		URL *string `json:"url,omitempty" url:"url,omitempty,key"` // location of the buildpack for the app. Either a url (unofficial
 		// buildpacks) or an internal urn (heroku official buildpacks).
 	} `json:"buildpacks,omitempty" url:"buildpacks,omitempty,key"` // buildpacks executed for this build, in order
@@ -1736,6 +1735,52 @@ func (s *Service) CreditList(ctx context.Context, lr *ListRange) (CreditListResu
 	return credit, s.Get(ctx, &credit, fmt.Sprintf("/account/credits"), nil, lr)
 }
 
+// A Docker image is a snapshot of your application code that is ready
+// to run on the platform.
+type DockerImage struct {
+	Command    []interface{}     `json:"command" url:"command,key"`       // the command to run
+	CreatedAt  time.Time         `json:"created_at" url:"created_at,key"` // when the image was created
+	Entrypoint *[]interface{}    `json:"entrypoint" url:"entrypoint,key"` // the entrypoint to the command
+	Env        map[string]string `json:"env" url:"env,key"`               // the runtime environment required for the command
+	ID         string            `json:"id" url:"id,key"`                 // unique identifier of the image
+	ImageID    string            `json:"image_id" url:"image_id,key"`     // the Docker image ID
+	Layers     struct {
+		System []struct {
+			URL string `json:"url" url:"url,key"` // the location of the system layer
+		} `json:"system" url:"system,key"` // the system layers of the image
+		User []struct {
+			Bucket string `json:"bucket" url:"bucket,key"` // the S3 bucket name where the user layer is stored
+			Object string `json:"object" url:"object,key"` // the S3 object name where the user layer is stored
+		} `json:"user" url:"user,key"` // the user layers of the image
+	} `json:"layers" url:"layers,key"` // the layers of the image
+	Shell            *[]interface{} `json:"shell" url:"shell,key"`                         // the default shell
+	UpdatedAt        time.Time      `json:"updated_at" url:"updated_at,key"`               // when the image was updated
+	WorkingDirectory string         `json:"working_directory" url:"working_directory,key"` // the working directory for the command
+}
+type DockerImageCreateOpts struct {
+	Command    *[]interface{}     `json:"command,omitempty" url:"command,omitempty,key"`       // the command to run
+	Entrypoint *[]interface{}     `json:"entrypoint,omitempty" url:"entrypoint,omitempty,key"` // the entrypoint to the command
+	Env        *map[string]string `json:"env,omitempty" url:"env,omitempty,key"`               // the runtime environment required for the command
+	ImageID    *string            `json:"image_id,omitempty" url:"image_id,omitempty,key"`     // the Docker image ID
+	Layers     struct {
+		System *[]*struct {
+			URL *string `json:"url,omitempty" url:"url,omitempty,key"` // the location of the system layer
+		} `json:"system,omitempty" url:"system,omitempty,key"` // the system layers of the image
+		User *[]*struct {
+			Bucket *string `json:"bucket,omitempty" url:"bucket,omitempty,key"` // the S3 bucket name where the user layer is stored
+			Object *string `json:"object,omitempty" url:"object,omitempty,key"` // the S3 object name where the user layer is stored
+		} `json:"user,omitempty" url:"user,omitempty,key"` // the user layers of the image
+	} `json:"layers" url:"layers,key"` // the layers of the image
+	Shell            *[]interface{} `json:"shell,omitempty" url:"shell,omitempty,key"`                         // the default shell
+	WorkingDirectory *string        `json:"working_directory,omitempty" url:"working_directory,omitempty,key"` // the working directory for the command
+}
+
+// Create a new Docker image.
+func (s *Service) DockerImageCreate(ctx context.Context, appIdentity string, o DockerImageCreateOpts) (*DockerImage, error) {
+	var dockerImage DockerImage
+	return &dockerImage, s.Post(ctx, &dockerImage, fmt.Sprintf("/apps/%v/docker-images", appIdentity), o)
+}
+
 // Domains define what web routes should be routed to an app on Heroku.
 type Domain struct {
 	AcmStatus       *string `json:"acm_status" url:"acm_status,key"`               // status of this record's ACM
@@ -1808,13 +1853,13 @@ type Dyno struct {
 	UpdatedAt time.Time `json:"updated_at" url:"updated_at,key"` // when process last changed state
 }
 type DynoCreateOpts struct {
-	Attach     *bool             `json:"attach,omitempty" url:"attach,omitempty,key"`             // whether to stream output or not
-	Command    string            `json:"command" url:"command,key"`                               // command used to start this process
-	Env        map[string]string `json:"env,omitempty" url:"env,omitempty,key"`                   // custom environment to add to the dyno config vars
-	ForceNoTty *bool             `json:"force_no_tty,omitempty" url:"force_no_tty,omitempty,key"` // force an attached one-off dyno to not run in a tty
-	Size       *string           `json:"size,omitempty" url:"size,omitempty,key"`                 // dyno size (default: "standard-1X")
-	TimeToLive *int              `json:"time_to_live,omitempty" url:"time_to_live,omitempty,key"` // seconds until dyno expires, after which it will soon be killed
-	Type       *string           `json:"type,omitempty" url:"type,omitempty,key"`                 // type of process
+	Attach     *bool              `json:"attach,omitempty" url:"attach,omitempty,key"`             // whether to stream output or not
+	Command    string             `json:"command" url:"command,key"`                               // command used to start this process
+	Env        *map[string]string `json:"env,omitempty" url:"env,omitempty,key"`                   // custom environment to add to the dyno config vars
+	ForceNoTty *bool              `json:"force_no_tty,omitempty" url:"force_no_tty,omitempty,key"` // force an attached one-off dyno to not run in a tty
+	Size       *string            `json:"size,omitempty" url:"size,omitempty,key"`                 // dyno size (default: "standard-1X")
+	TimeToLive *int               `json:"time_to_live,omitempty" url:"time_to_live,omitempty,key"` // seconds until dyno expires, after which it will soon be killed
+	Type       *string            `json:"type,omitempty" url:"type,omitempty,key"`                 // type of process
 }
 
 // Create a new dyno.
@@ -1900,7 +1945,7 @@ func (s *Service) DynoSizeList(ctx context.Context, lr *ListRange) (DynoSizeList
 type FilterApps struct{}
 type FilterAppsAppsOpts struct {
 	In *struct {
-		ID []*string `json:"id,omitempty" url:"id,omitempty,key"`
+		ID *[]*string `json:"id,omitempty" url:"id,omitempty,key"`
 	} `json:"in,omitempty" url:"in,omitempty,key"`
 }
 type FilterAppsAppsResult []struct {
@@ -1959,8 +2004,11 @@ type Formation struct {
 		ID   string `json:"id" url:"id,key"`     // unique identifier of app
 		Name string `json:"name" url:"name,key"` // unique name of app
 	} `json:"app" url:"app,key"` // app formation belongs to
-	Command   string    `json:"command" url:"command,key"`       // command to use to launch this process
-	CreatedAt time.Time `json:"created_at" url:"created_at,key"` // when process type was created
+	Command     string    `json:"command" url:"command,key"`       // command to use to launch this process
+	CreatedAt   time.Time `json:"created_at" url:"created_at,key"` // when process type was created
+	DockerImage *struct {
+		ID string `json:"id" url:"id,key"` // unique identifier of the image
+	} `json:"docker_image" url:"docker_image,key"` // the Docker image used by this process type
 	ID        string    `json:"id" url:"id,key"`                 // unique identifier of this process type
 	Quantity  int       `json:"quantity" url:"quantity,key"`     // number of processes to maintain
 	Size      string    `json:"size" url:"size,key"`             // dyno size (default: "standard-1X")
@@ -1984,9 +2032,11 @@ func (s *Service) FormationList(ctx context.Context, appIdentity string, lr *Lis
 
 type FormationBatchUpdateOpts struct {
 	Updates []struct {
-		Quantity *int    `json:"quantity,omitempty" url:"quantity,omitempty,key"` // number of processes to maintain
-		Size     *string `json:"size,omitempty" url:"size,omitempty,key"`         // dyno size (default: "standard-1X")
-		Type     string  `json:"type" url:"type,key"`                             // type of process to maintain
+		Command     *[]interface{} `json:"command,omitempty" url:"command,omitempty,key"`           // the command to run
+		DockerImage *string        `json:"docker_image,omitempty" url:"docker_image,omitempty,key"` // unique identifier of the image
+		Process     string         `json:"process" url:"process,key"`                               // unique identifier of this process type
+		Quantity    *int           `json:"quantity,omitempty" url:"quantity,omitempty,key"`         // number of processes to maintain
+		Size        *string        `json:"size,omitempty" url:"size,omitempty,key"`                 // dyno size (default: "standard-1X")
 	} `json:"updates" url:"updates,key"` // Array with formation updates. Each element must have "type", the id
 	// or name of the process type to be updated, and can optionally update
 	// its "quantity" or "size".
@@ -2000,8 +2050,10 @@ func (s *Service) FormationBatchUpdate(ctx context.Context, appIdentity string, 
 }
 
 type FormationUpdateOpts struct {
-	Quantity *int    `json:"quantity,omitempty" url:"quantity,omitempty,key"` // number of processes to maintain
-	Size     *string `json:"size,omitempty" url:"size,omitempty,key"`         // dyno size (default: "standard-1X")
+	Command     *[]interface{} `json:"command,omitempty" url:"command,omitempty,key"`           // the command to run
+	DockerImage *string        `json:"docker_image,omitempty" url:"docker_image,omitempty,key"` // unique identifier of the image
+	Quantity    *int           `json:"quantity,omitempty" url:"quantity,omitempty,key"`         // number of processes to maintain
+	Size        *string        `json:"size,omitempty" url:"size,omitempty,key"`                 // dyno size (default: "standard-1X")
 }
 
 // Update process type
@@ -2141,7 +2193,7 @@ func (s *Service) InboundRulesetList(ctx context.Context, spaceIdentity string, 
 }
 
 type InboundRulesetCreateOpts struct {
-	Rules []*struct {
+	Rules *[]*struct {
 		Action string `json:"action" url:"action,key"` // states whether the connection is allowed or denied
 		Source string `json:"source" url:"source,key"` // is the request’s source in CIDR notation
 	} `json:"rules,omitempty" url:"rules,omitempty,key"`
@@ -2621,8 +2673,9 @@ type OrganizationAddOnListForOrganizationResult []struct {
 		Name string `json:"name" url:"name,key"` // unique name of app
 	} `json:"app" url:"app,key"` // billing application associated with this add-on
 	BilledPrice *struct {
-		Cents int    `json:"cents" url:"cents,key"` // price in cents per unit of plan
-		Unit  string `json:"unit" url:"unit,key"`   // unit of price for plan
+		Cents    int    `json:"cents" url:"cents,key"`       // price in cents per unit of plan
+		Contract bool   `json:"contract" url:"contract,key"` // price is negotiated in a contract outside of monthly add-on billing
+		Unit     string `json:"unit" url:"unit,key"`         // unit of price for plan
 	} `json:"billed_price" url:"billed_price,key"` // billed price
 	ConfigVars []string  `json:"config_vars" url:"config_vars,key"` // config vars exposed to the owning app by this add-on
 	CreatedAt  time.Time `json:"created_at" url:"created_at,key"`   // when add-on was created
@@ -2766,9 +2819,9 @@ type OrganizationAppCollaborator struct {
 	} `json:"user" url:"user,key"` // identity of collaborated account
 }
 type OrganizationAppCollaboratorCreateOpts struct {
-	Permissions []*string `json:"permissions,omitempty" url:"permissions,omitempty,key"` // An array of permissions to give to the collaborator.
-	Silent      *bool     `json:"silent,omitempty" url:"silent,omitempty,key"`           // whether to suppress email invitation when creating collaborator
-	User        string    `json:"user" url:"user,key"`                                   // unique email address of account
+	Permissions *[]*string `json:"permissions,omitempty" url:"permissions,omitempty,key"` // An array of permissions to give to the collaborator.
+	Silent      *bool      `json:"silent,omitempty" url:"silent,omitempty,key"`           // whether to suppress email invitation when creating collaborator
+	User        string     `json:"user" url:"user,key"`                                   // unique email address of account
 }
 
 // Create a new collaborator on an organization app. Use this endpoint
@@ -3151,7 +3204,7 @@ func (s *Service) OutboundRulesetList(ctx context.Context, spaceIdentity string,
 }
 
 type OutboundRulesetCreateOpts struct {
-	Rules []*struct {
+	Rules *[]*struct {
 		FromPort int    `json:"from_port" url:"from_port,key"` // an endpoint of communication in an operating system.
 		Protocol string `json:"protocol" url:"protocol,key"`   // formal standards and policies comprised of rules, procedures and
 		// formats that define communication between two or more devices over a
@@ -3195,6 +3248,65 @@ type PasswordResetCompleteResetPasswordOpts struct {
 func (s *Service) PasswordResetCompleteResetPassword(ctx context.Context, passwordResetResetPasswordToken string, o PasswordResetCompleteResetPasswordOpts) (*PasswordReset, error) {
 	var passwordReset PasswordReset
 	return &passwordReset, s.Post(ctx, &passwordReset, fmt.Sprintf("/password-resets/%v/actions/finalize", passwordResetResetPasswordToken), o)
+}
+
+// [Peering](https://devcenter.heroku.com/articles/private-space-vpc-peer
+// ing) provides a way to peer your Private Space VPC to another AWS
+// VPC.
+type Peering struct {
+	AwsAccountID string    `json:"aws_account_id" url:"aws_account_id,key"` // The AWS account ID of your Private Space.
+	AwsVpcID     string    `json:"aws_vpc_id" url:"aws_vpc_id,key"`         // The AWS VPC ID of the peer.
+	CidrBlocks   []string  `json:"cidr_blocks" url:"cidr_blocks,key"`       // The CIDR blocks of the peer.
+	Expires      time.Time `json:"expires" url:"expires,key"`               // When a peering connection will expire.
+	PcxID        string    `json:"pcx_id" url:"pcx_id,key"`                 // The AWS VPC Peering Connection ID of the peering.
+	Status       string    `json:"status" url:"status,key"`                 // The status of the peering connection.
+	Type         string    `json:"type" url:"type,key"`                     // The type of peering connection.
+}
+type PeeringListResult []Peering
+
+// List peering connections of a private space.
+func (s *Service) PeeringList(ctx context.Context, spaceIdentity string, lr *ListRange) (PeeringListResult, error) {
+	var peering PeeringListResult
+	return peering, s.Get(ctx, &peering, fmt.Sprintf("/spaces/%v/peerings", spaceIdentity), nil, lr)
+}
+
+// Accept a pending peering connection with a private space.
+func (s *Service) PeeringAccept(ctx context.Context, spaceIdentity string, peeringPcxID string) (*Peering, error) {
+	var peering Peering
+	return &peering, s.Post(ctx, &peering, fmt.Sprintf("/spaces/%v/peerings/%v/actions/accept", spaceIdentity, peeringPcxID), nil)
+}
+
+// Destroy an active peering connection with a private space.
+func (s *Service) PeeringDestroy(ctx context.Context, spaceIdentity string, peeringPcxID string) (*Peering, error) {
+	var peering Peering
+	return &peering, s.Delete(ctx, &peering, fmt.Sprintf("/spaces/%v/peerings/%v", spaceIdentity, peeringPcxID))
+}
+
+// Fetch information for existing peering connection
+func (s *Service) PeeringInfo(ctx context.Context, spaceIdentity string, peeringPcxID string) (*Peering, error) {
+	var peering Peering
+	return &peering, s.Get(ctx, &peering, fmt.Sprintf("/spaces/%v/peerings/%v", spaceIdentity, peeringPcxID), nil, nil)
+}
+
+// [Peering
+// Info](https://devcenter.heroku.com/articles/private-space-vpc-peering)
+//  gives you the information necessary to peer an AWS VPC to a Private
+// Space.
+type PeeringInfo struct {
+	AwsAccountID          string   `json:"aws_account_id" url:"aws_account_id,key"`                   // The AWS account ID of your Private Space.
+	AwsRegion             string   `json:"aws_region" url:"aws_region,key"`                           // region name used by provider
+	DynoCidrBlocks        []string `json:"dyno_cidr_blocks" url:"dyno_cidr_blocks,key"`               // The CIDR ranges that should be routed to the Private Space VPC.
+	UnavailableCidrBlocks []string `json:"unavailable_cidr_blocks" url:"unavailable_cidr_blocks,key"` // The CIDR ranges that you must not conflict with.
+	VpcCidr               string   `json:"vpc_cidr" url:"vpc_cidr,key"`                               // An IP address and the number of significant bits that make up the
+	// routing or networking portion.
+	VpcID string `json:"vpc_id" url:"vpc_id,key"` // The AWS VPC ID of the peer.
+}
+
+// Provides the necessary information to establish an AWS VPC Peering
+// with your private space.
+func (s *Service) PeeringInfoInfo(ctx context.Context, spaceIdentity string) (*PeeringInfo, error) {
+	var peeringInfo PeeringInfo
+	return &peeringInfo, s.Get(ctx, &peeringInfo, fmt.Sprintf("/spaces/%v/peering-info", spaceIdentity), nil, nil)
 }
 
 // A pipeline allows grouping of apps into different stages.
@@ -3391,7 +3503,7 @@ type Plan struct {
 		ID   string `json:"id" url:"id,key"`     // unique identifier of this add-on-service
 		Name string `json:"name" url:"name,key"` // unique name of this add-on-service
 	} `json:"addon_service" url:"addon_service,key"` // identity of add-on service
-	Compliance                       []string  `json:"compliance" url:"compliance,key"`                                                   // the compliance regimes applied to an add-on plan
+	Compliance                       *[]string `json:"compliance" url:"compliance,key"`                                                   // the compliance regimes applied to an add-on plan
 	CreatedAt                        time.Time `json:"created_at" url:"created_at,key"`                                                   // when plan was created
 	Default                          bool      `json:"default" url:"default,key"`                                                         // whether this plan is the default for its add-on service
 	Description                      string    `json:"description" url:"description,key"`                                                 // description of plan
@@ -3401,8 +3513,9 @@ type Plan struct {
 	InstallableOutsidePrivateNetwork bool      `json:"installable_outside_private_network" url:"installable_outside_private_network,key"` // whether this plan is installable to a Common Runtime app
 	Name                             string    `json:"name" url:"name,key"`                                                               // unique name of this plan
 	Price                            struct {
-		Cents int    `json:"cents" url:"cents,key"` // price in cents per unit of plan
-		Unit  string `json:"unit" url:"unit,key"`   // unit of price for plan
+		Cents    int    `json:"cents" url:"cents,key"`       // price in cents per unit of plan
+		Contract bool   `json:"contract" url:"contract,key"` // price is negotiated in a contract outside of monthly add-on billing
+		Unit     string `json:"unit" url:"unit,key"`         // unit of price for plan
 	} `json:"price" url:"price,key"` // price
 	SpaceDefault bool      `json:"space_default" url:"space_default,key"` // whether this plan is the default for apps in Private Spaces
 	State        string    `json:"state" url:"state,key"`                 // release status for plan
@@ -3776,7 +3889,7 @@ func (s *Service) SpaceAppAccessInfo(ctx context.Context, spaceIdentity string, 
 }
 
 type SpaceAppAccessUpdateOpts struct {
-	Permissions []*struct {
+	Permissions *[]*struct {
 		Name *string `json:"name,omitempty" url:"name,omitempty,key"`
 	} `json:"permissions,omitempty" url:"permissions,omitempty,key"`
 }
@@ -4088,9 +4201,9 @@ type TeamAppCollaborator struct {
 	} `json:"user" url:"user,key"` // identity of collaborated account
 }
 type TeamAppCollaboratorCreateOpts struct {
-	Permissions []*string `json:"permissions,omitempty" url:"permissions,omitempty,key"` // An array of permissions to give to the collaborator.
-	Silent      *bool     `json:"silent,omitempty" url:"silent,omitempty,key"`           // whether to suppress email invitation when creating collaborator
-	User        string    `json:"user" url:"user,key"`                                   // unique email address of account
+	Permissions *[]*string `json:"permissions,omitempty" url:"permissions,omitempty,key"` // An array of permissions to give to the collaborator.
+	Silent      *bool      `json:"silent,omitempty" url:"silent,omitempty,key"`           // whether to suppress email invitation when creating collaborator
+	User        string     `json:"user" url:"user,key"`                                   // unique email address of account
 }
 
 // Create a new collaborator on a team app. Use this endpoint instead of
@@ -4429,9 +4542,9 @@ type UserPreferences struct {
 	DismissedPipelinesBanner       *bool `json:"dismissed-pipelines-banner" url:"dismissed-pipelines-banner,key"`               // Whether the user has dismissed the Pipelines banner
 	DismissedPipelinesGithubBanner *bool `json:"dismissed-pipelines-github-banner" url:"dismissed-pipelines-github-banner,key"` // Whether the user has dismissed the GitHub banner on a pipeline
 	// overview
-	DismissedPipelinesGithubBanners []string `json:"dismissed-pipelines-github-banners" url:"dismissed-pipelines-github-banners,key"` // Which pipeline uuids the user has dismissed the GitHub banner for
-	DismissedSmsBanner              *bool    `json:"dismissed-sms-banner" url:"dismissed-sms-banner,key"`                             // Whether the user has dismissed the 2FA SMS banner
-	Timezone                        *string  `json:"timezone" url:"timezone,key"`                                                     // User's default timezone
+	DismissedPipelinesGithubBanners *[]string `json:"dismissed-pipelines-github-banners" url:"dismissed-pipelines-github-banners,key"` // Which pipeline uuids the user has dismissed the GitHub banner for
+	DismissedSmsBanner              *bool     `json:"dismissed-sms-banner" url:"dismissed-sms-banner,key"`                             // Whether the user has dismissed the 2FA SMS banner
+	Timezone                        *string   `json:"timezone" url:"timezone,key"`                                                     // User's default timezone
 }
 
 // Retrieve User Preferences
@@ -4450,9 +4563,9 @@ type UserPreferencesUpdateOpts struct {
 	DismissedPipelinesBanner       *bool `json:"dismissed-pipelines-banner,omitempty" url:"dismissed-pipelines-banner,omitempty,key"`               // Whether the user has dismissed the Pipelines banner
 	DismissedPipelinesGithubBanner *bool `json:"dismissed-pipelines-github-banner,omitempty" url:"dismissed-pipelines-github-banner,omitempty,key"` // Whether the user has dismissed the GitHub banner on a pipeline
 	// overview
-	DismissedPipelinesGithubBanners []*string `json:"dismissed-pipelines-github-banners,omitempty" url:"dismissed-pipelines-github-banners,omitempty,key"` // Which pipeline uuids the user has dismissed the GitHub banner for
-	DismissedSmsBanner              *bool     `json:"dismissed-sms-banner,omitempty" url:"dismissed-sms-banner,omitempty,key"`                             // Whether the user has dismissed the 2FA SMS banner
-	Timezone                        *string   `json:"timezone,omitempty" url:"timezone,omitempty,key"`                                                     // User's default timezone
+	DismissedPipelinesGithubBanners *[]*string `json:"dismissed-pipelines-github-banners,omitempty" url:"dismissed-pipelines-github-banners,omitempty,key"` // Which pipeline uuids the user has dismissed the GitHub banner for
+	DismissedSmsBanner              *bool      `json:"dismissed-sms-banner,omitempty" url:"dismissed-sms-banner,omitempty,key"`                             // Whether the user has dismissed the 2FA SMS banner
+	Timezone                        *string    `json:"timezone,omitempty" url:"timezone,omitempty,key"`                                                     // User's default timezone
 }
 
 // Update User Preferences
