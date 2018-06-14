@@ -2032,11 +2032,11 @@ func (s *Service) FormationList(ctx context.Context, appIdentity string, lr *Lis
 
 type FormationBatchUpdateOpts struct {
 	Updates []struct {
-		Command     *[]interface{} `json:"command,omitempty" url:"command,omitempty,key"`           // the command to run
-		DockerImage *string        `json:"docker_image,omitempty" url:"docker_image,omitempty,key"` // unique identifier of the image
-		Process     string         `json:"process" url:"process,key"`                               // unique identifier of this process type
-		Quantity    *int           `json:"quantity,omitempty" url:"quantity,omitempty,key"`         // number of processes to maintain
-		Size        *string        `json:"size,omitempty" url:"size,omitempty,key"`                 // dyno size (default: "standard-1X")
+		Command     *string `json:"command,omitempty" url:"command,omitempty,key"`           // command to use to launch this process
+		DockerImage *string `json:"docker_image,omitempty" url:"docker_image,omitempty,key"` // unique identifier of the image
+		Process     string  `json:"process" url:"process,key"`                               // unique identifier of this process type
+		Quantity    *int    `json:"quantity,omitempty" url:"quantity,omitempty,key"`         // number of processes to maintain
+		Size        *string `json:"size,omitempty" url:"size,omitempty,key"`                 // dyno size (default: "standard-1X")
 	} `json:"updates" url:"updates,key"` // Array with formation updates. Each element must have "type", the id
 	// or name of the process type to be updated, and can optionally update
 	// its "quantity" or "size".
@@ -2050,10 +2050,10 @@ func (s *Service) FormationBatchUpdate(ctx context.Context, appIdentity string, 
 }
 
 type FormationUpdateOpts struct {
-	Command     *[]interface{} `json:"command,omitempty" url:"command,omitempty,key"`           // the command to run
-	DockerImage *string        `json:"docker_image,omitempty" url:"docker_image,omitempty,key"` // unique identifier of the image
-	Quantity    *int           `json:"quantity,omitempty" url:"quantity,omitempty,key"`         // number of processes to maintain
-	Size        *string        `json:"size,omitempty" url:"size,omitempty,key"`                 // dyno size (default: "standard-1X")
+	Command     *string `json:"command,omitempty" url:"command,omitempty,key"`           // command to use to launch this process
+	DockerImage *string `json:"docker_image,omitempty" url:"docker_image,omitempty,key"` // unique identifier of the image
+	Quantity    *int    `json:"quantity,omitempty" url:"quantity,omitempty,key"`         // number of processes to maintain
+	Size        *string `json:"size,omitempty" url:"size,omitempty,key"`                 // dyno size (default: "standard-1X")
 }
 
 // Update process type

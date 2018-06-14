@@ -5624,7 +5624,7 @@
               "$ref": "#/definitions/docker-image/definitions/identity"
             },
             "command": {
-              "$ref": "#/definitions/docker-image/definitions/command"
+              "$ref": "#/definitions/formation/definitions/command"
             },
             "process": {
               "$ref": "#/definitions/formation/definitions/identity"
@@ -5722,7 +5722,7 @@
           "schema": {
             "properties": {
               "command": {
-                "$ref": "#/definitions/docker-image/definitions/command"
+                "$ref": "#/definitions/formation/definitions/command"
               },
               "docker_image": {
                 "$ref": "#/definitions/docker-image/definitions/identity"
